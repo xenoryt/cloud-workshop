@@ -1,0 +1,31 @@
+version: '3.7'
+
+services:
+  nextcloud:
+    image: nextcloud:21
+    ports:
+      - 80:80
+    links:
+      - nextcloud-db
+    volumes:
+      - ./nextcloud/data:/var/www/html
+    restart: always
+    environment:
+      MYSQL_HOST: nextcloud-db
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
+      MYSQL_PASSWORD: 'aabbcc'
+    depends_on:
+      - nextcloud-db
+
+  nextcloud-db:
+    image: mariadb
+    command: --transaction-isolation=READ-COMMITTED --binlog-format=ROW
+    restart: always
+    volumes:
+      - ./nextcloud/db:/var/lib/mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: 'aabbcc'
+      MYSQL_PASSWORD: 'aabbcc'
+      MYSQL_DATABASE: nextcloud
+      MYSQL_USER: nextcloud
