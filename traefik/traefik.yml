@@ -1,0 +1,30 @@
+providers:
+  docker:
+    exposedByDefault: false
+
+log:
+  level: INFO
+
+entryPoints:
+  web:
+    address: :80
+    http:
+      redirections:
+        entryPoint:
+          to: websecure
+          scheme: https
+
+  websecure:
+    address: :443
+    http:
+      tls:
+        certResolver: myresolver
+        domains:
+          - main: "" # TODO: CONFIGURE THIS
+
+certificatesResolvers:
+  myresolver:
+    acme:
+      email: "" # TODO: CONFIGURE THIS
+      storage: /etc/traefik/acme.json
+      tlsChallenge: {}

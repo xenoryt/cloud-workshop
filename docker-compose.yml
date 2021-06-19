@@ -1,10 +1,19 @@
 version: '3.7'
 
 services:
-  nextcloud:
-    image: nextcloud:21
+  traefik:
+    image: traefik:v2.2
     ports:
       - 80:80
+      - 443:443
+    volumes:
+      - ./traefik:/etc/traefik
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  nextcloud:
+    image: nextcloud:21
+    expose:
+      - 80
     links:
       - nextcloud-db
     volumes:
@@ -15,8 +24,15 @@ services:
       MYSQL_DATABASE: nextcloud
       MYSQL_USER: nextcloud
       MYSQL_PASSWORD: 'aabbcc'
+      NEXTCLOUD_TRUSTED_DOMAINS: "" # TODO: CONFIGURE THIS
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.nextcloud.entrypoints=websecure
+      - traefik.http.routers.nextcloud.rule=PathPrefix(`/`)
+      #- traefik.http.routers.nextcloud.rule=Host(`test.skywardbox.net`)
     depends_on:
       - nextcloud-db
+      - traefik
 
   nextcloud-db:
     image: mariadb
